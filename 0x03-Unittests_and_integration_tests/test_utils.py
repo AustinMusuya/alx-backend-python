@@ -2,7 +2,7 @@
 
 import unittest
 from parameterized import parameterized
-from typing import Mapping, Sequence, Any, Tuple
+from typing import Mapping, Sequence, Any, Tuple, Dict
 from utils import access_nested_map, get_json
 from unittest.mock import patch, Mock
 
