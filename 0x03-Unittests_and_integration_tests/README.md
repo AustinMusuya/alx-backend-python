@@ -1,14 +1,17 @@
 # Python Utilities Testing Project
 
-This project contains utility functions and their corresponding unit tests, written in Python 3.7 and compliant with Ubuntu 18.04 standards.
+This project contains utility functions, a GitHub API client, and their corresponding unit and integration tests. It is written in Python 3.7 and is compliant with Ubuntu 18.04 standards.
 
 ## 📁 Project Structure
 
 ```
 .
-├── utils.py              # Utility module with reusable functions
-├── test_utils.py         # Unit tests using unittest and parameterized
-├── README.md             # Project documentation
+├── utils.py                   # Utility module with reusable functions
+├── test_utils.py              # Unit tests for utils.py
+├── client.py                  # GitHubOrgClient implementation
+├── test_client.py             # Unit and integration tests for client.py
+├── fixtures.py                # Sample payloads used for integration testing
+├── README.md                  # Project documentation
 ```
 
 ## 🛠️ Requirements
@@ -16,18 +19,22 @@ This project contains utility functions and their corresponding unit tests, writ
 - Python 3.7
 - `parameterized` module for test expansion
 - `pycodestyle` version 2.5
+- `requests` for GitHub API access
 - Unix-based system (Ubuntu 18.04 LTS recommended)
 
 Install dependencies:
 
 ```bash
-pip install parameterized pycodestyle==2.5
+pip install parameterized pycodestyle==2.5 requests
 ```
 
 ## 📌 Features
 
 - `access_nested_map`: Retrieve a value from a nested dictionary using a sequence of keys.
-- Full unit test coverage using `unittest` and `parameterized`.
+- `get_json`: Fetch JSON data from a URL.
+- `memoize`: Decorator for caching method results.
+- `GithubOrgClient`: Client to interact with GitHub Organization APIs.
+- Full unit and integration test coverage using `unittest` and `parameterized`.
 - PEP8-compliant (`pycodestyle` 2.5).
 - All modules, classes, and functions are type-annotated and documented with complete sentences.
 
@@ -36,16 +43,17 @@ pip install parameterized pycodestyle==2.5
 You can run all tests using the built-in `unittest` module:
 
 ```bash
-python3 -m unittest test_utils.py
+python3 -m unittest discover
 ```
 
 ## 🧪 Sample Test Cases
 
 The test suite includes:
 
-- Valid nested dictionary access
-- Path sequences of varying depth
-- Parameterized inputs for streamlined coverage
+- Unit tests for nested dictionary access, JSON fetching, and memoization
+- Mocked GitHub API responses for robust testing of `GithubOrgClient`
+- Parameterized tests for license filtering and public repo listing
+- Integration tests using fixture-based mocking
 
 ## ⚙️ Conventions Followed
 
