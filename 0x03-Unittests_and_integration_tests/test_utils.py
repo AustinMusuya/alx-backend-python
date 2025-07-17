@@ -91,8 +91,8 @@ class TestMemoize(unittest.TestCase):
             TestClass, 'a_method', return_value=42
         ) as mock_method:
             test_instance = TestClass()
-            result1 = test_instance.a_property()
-            result2 = test_instance.a_property()
+            result1 = test_instance.a_property
+            result2 = test_instance.a_property
 
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
