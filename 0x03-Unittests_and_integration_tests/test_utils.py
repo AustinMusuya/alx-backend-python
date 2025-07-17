@@ -19,8 +19,13 @@ class TestAccessNestedMap(unittest.TestCase):
                                nested_map: Mapping[str, Any],
                                path: Sequence[str],
                                expected: Any) -> None:
-        """Test access_nested_map returns correct value for given path."""
-        self.assertEqual(access_nested_map(nested_map, path), expected)
+        # """Test access_nested_map returns correct value for given path."""
+        # self.assertEqual(access_nested_map(nested_map, path), expected)
+        """Test access_nested_map raises KeyError with invalid path."""
+        with self.assertRaises(KeyError) as context:
+            access_nested_map(nested_map, path)
+
+        self.assertEqual(str(context.exception), repr(path[-1]))
 
 
 class TestGetJson(unittest.TestCase):
