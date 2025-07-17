@@ -1,9 +1,24 @@
 #!/usr/bin/env python3
 
+"""
+Unit tests for utility functions defined in utils.py.
+
+This module contains unittests for:
+- access_nested_map
+- get_json
+- memoize
+"""
+
+
 import unittest
 from parameterized import parameterized
 from typing import Mapping, Sequence, Any, Tuple, Dict
-from utils import access_nested_map, get_json, memoize
+from utils import (
+    access_nested_map,
+    get_json,
+    memoize,
+)
+
 from unittest.mock import patch, Mock
 
 
@@ -63,8 +78,7 @@ class TestMemoize(unittest.TestCase):
     """TestCase for the memoize decorator."""
 
     def test_memoize(self):
-        """Test that memoize caches the result of a method."""
-
+        """Test that memoize caches method results."""
         class TestClass:
             def a_method(self):
                 return 42
@@ -73,16 +87,13 @@ class TestMemoize(unittest.TestCase):
             def a_property(self):
                 return self.a_method()
 
-        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
-            instance = TestClass()
+        with patch.object(
+            TestClass, 'a_method', return_value=42
+        ) as mock_method:
+            test_instance = TestClass()
+            result1 = test_instance.a_property()
+            result2 = test_instance.a_property()
 
-            # Call a_property twice
-            result1 = instance.a_property()
-            result2 = instance.a_property()
-
-            # Assert the result is correct
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
-
-            # a_method should be called only once due to memoization
             mock_method.assert_called_once()
