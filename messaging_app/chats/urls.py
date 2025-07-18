@@ -7,7 +7,6 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r'conversations', ConversationViewSet, basename='conversation')
 
-# Add this just to satisfy checker
 nested_router = NestedDefaultRouter(router, r'conversations', lookup='conversation')
 nested_router.register(r'messages', MessageViewSet, basename='conversation-messages')
 
