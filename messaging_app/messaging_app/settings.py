@@ -51,6 +51,7 @@ REST_FRAMEWORK = {
     ]
 }
 
+AUTH_USER_MODEL = 'chats.User'   # set custom user model for the app
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
