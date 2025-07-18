@@ -1,8 +1,6 @@
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import authenticate
 from rest_framework import serializers
-from models import Conversation, Message
-
-User = get_user_model()
+from .models import Conversation, Message, User
 
 # Create User serializer class
 
@@ -49,8 +47,12 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ConversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
-    messages = MessageSerializer(many=True, read_only=True)
+    messages = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
         fields = ['conversation_id', 'participants', 'messages','created_at']
+
+    def get_messages(self, obj):
+        messages = obj.message_set.order_by('sent_at')  # or use related_name if defined
+        return MessageSerializer(messages, many=True).data
