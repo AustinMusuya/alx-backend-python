@@ -80,3 +80,25 @@ class OffensiveLanguageMiddleware:
         if x_forwarded_for:
             return x_forwarded_for.split(',')[0].strip()
         return request.META.get('REMOTE_ADDR', '')
+
+# === Restrict access to certain endpoints based on user role (RolepermissionMiddleware) ===
+
+
+class RolepermissionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # You can optionally define which paths this should protect
+        self.protected_paths = ['/api/chats/', '/api/messages/']
+
+    def __call__(self, request):
+        # Only apply to protected paths (optional)
+        if any(request.path.startswith(p) for p in self.protected_paths):
+            user = request.user
+            if user.is_authenticated:
+                # Check if the user has a 'role' attribute
+                user_role = getattr(user, 'role', None)
+                if user_role not in ['admin', 'moderator']:
+                    return HttpResponseForbidden("You do not have permission to access this resource.")
+            else:
+                return HttpResponseForbidden("Authentication required.")
+        return self.get_response(request)
