@@ -6,30 +6,38 @@ from rest_framework import viewsets, status, filters
 # authentication & Permisions api views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from .permissions import IsOwnerOfConversation, IsOwnerOfMessage
 
 
 # viewset to perform CRUD operations
 
 class ConversationViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
-    queryset = Conversation.objects.all()
+    permission_classes = [IsAuthenticated, IsOwnerOfConversation]
+    # queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    
+
+    def get_queryset(self):
+        # Only return conversations the user is a participant in
+        return Conversation.objects.filter(participants=self.request.user)
+
     def get(self, request):
         return Response({'message': 'Hello authenticated user'}, status=status.HTTP_200_OK)
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOfMessage]
     serializer_class = MessageSerializer
-    filter_backends = [filters.OrderingFilter]  
-    ordering_fields = ['sent_at'] 
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['sent_at']
 
     def get_queryset(self):
         conversation_id = self.request.query_params.get('conversation_id')
         if conversation_id:
-            return Message.objects.filter(conversation_id=conversation_id)
-        return Message.objects.all()
+            return Message.objects.filter(
+                conversation_id=conversation_id,
+                conversation__participants=self.request.user
+            )
+        return Message.objects.filter(conversation__participants=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
