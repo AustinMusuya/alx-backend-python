@@ -6,13 +6,13 @@ from rest_framework import viewsets, status, filters
 # authentication & Permisions api views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .permissions import IsOwnerOfConversation, IsOwnerOfMessage
+from .permissions import IsOwnerOfConversation, IsOwnerOfMessage, IsParticipantOfConversation
 
 
 # viewset to perform CRUD operations
 
 class ConversationViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsOwnerOfConversation]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     # queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
 
@@ -25,7 +25,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsOwnerOfMessage]
+    permission_classes = [IsAuthenticated,
+                          IsOwnerOfMessage, IsParticipantOfConversation]
     serializer_class = MessageSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['sent_at']
