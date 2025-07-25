@@ -23,6 +23,7 @@ class IsOwnerOfMessage(permissions.BasePermission):
 class IsParticipantOfConversation(permissions.BasePermission):
     """
     Allows access only to participants of the conversation.
+    Explicitly checks for safe and unsafe methods.
     """
 
     def has_permission(self, request, view):
@@ -30,14 +31,19 @@ class IsParticipantOfConversation(permissions.BasePermission):
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        """
-        Called when checking access to a specific object.
-        Works for both Conversation and Message instances.
-        """
+        user = request.user
+
         if hasattr(obj, 'participants'):
             # Conversation instance
-            return request.user in obj.participants.all()
+            is_participant = user in obj.participants.all()
         elif hasattr(obj, 'conversation'):
             # Message instance
-            return request.user in obj.conversation.participants.all()
+            is_participant = user in obj.conversation.participants.all()
+        else:
+            return False
+
+        # Explicitly handle common HTTP methods for clarity
+        if request.method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']:
+            return is_participant
+
         return False

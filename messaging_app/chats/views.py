@@ -42,3 +42,13 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user not in instance.conversation.participants.all():
+            return Response(
+                {"detail": "You are not authorized to view this message."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
