@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import datetime, time
 import logging
 import os
+from django.http import HttpResponseForbidden
 
 # Ensure the logs directory or file exists
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,3 +27,18 @@ class RequestLoggingMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+# === Restrict Access By Time Middleware ===
+class RestrictAccessByTimeMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # Access allowed only from 6PM to 9PM (18:00 to 21:00)
+        self.allowed_start = time(18, 0)
+        self.allowed_end = time(21, 0)
+
+    def __call__(self, request):
+        current_time = datetime.now().time()
+        if not (self.allowed_start <= current_time <= self.allowed_end):
+            return HttpResponseForbidden("Access to chats is only allowed between 6PM and 9PM.")
+        return self.get_response(request)
