@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 import uuid
+from messaging.managers import UnreadMessagesManager
 
 User  = get_user_model()
 
@@ -12,6 +13,9 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(null= True, blank= True)
     parent_message = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
+    read = models.BooleanField(default=False)
+
+    unread = UnreadMessagesManager()
 
     def __str__(self):
         return f"{self.sender.username}: {self.content[:30]}"
