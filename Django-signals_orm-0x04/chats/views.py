@@ -2,6 +2,8 @@ from django.shortcuts import render
 from .serializers import ConversationSerializer, MessageSerializer
 from .models import Message, Conversation
 from rest_framework import viewsets, status, filters
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 # authentication & Permisions api views
 from rest_framework.permissions import IsAuthenticated
@@ -19,6 +21,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Only return conversations the user is a participant in
         return Conversation.objects.filter(participants=self.request.user)
+    
+    @method_decorator(cache_page(60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get(self, request):
         return Response({'message': 'Hello authenticated user'}, status=status.HTTP_200_OK)
