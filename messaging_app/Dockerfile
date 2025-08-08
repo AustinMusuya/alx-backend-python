@@ -25,3 +25,9 @@ EXPOSE 8000
 # 7. Create command to run the application
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+# Build the container then run it:
+
+# 1 Build (within messaging_app dir): docker build -t messaging_app_image .  
+
+# 2 Run: docker run -d -p 8000:8000 --name messaging_app_container messaging_app_image
