@@ -2,12 +2,12 @@ name: Django CI
 
 on:
   push:
-    branches: ["*"]
+    branches: ["**"]
   pull_request:
-    branches: ["*"]
+    branches: ["**"]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     services:
@@ -16,22 +16,20 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: test_db
-          MYSQL_USER: test_user
-          MYSQL_PASSWORD: test_pass
         ports:
           - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=3
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
@@ -39,30 +37,36 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install flake8 coverage
 
-      - name: Wait for MySQL to be ready
+      - name: Wait for MySQL
         run: |
-          until mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SELECT 1;" ; do
+          until mysqladmin ping -h"127.0.0.1" -uroot -proot --silent; do
             echo "Waiting for MySQL..."
             sleep 5
           done
 
       - name: Run migrations
         env:
-          DB_NAME: test_db
-          DB_USER: test_user
-          DB_PASSWORD: test_pass
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/test_db
         run: |
           python manage.py migrate
 
-      - name: Run tests
+      - name: Run Django tests with coverage
         env:
-          DB_NAME: test_db
-          DB_USER: test_user
-          DB_PASSWORD: test_pass
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/test_db
         run: |
-          python manage.py test
+          coverage run manage.py test
+          coverage report -m
+          coverage xml
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+      - name: Lint with flake8
+        run: |
+          # exit-zero treats all errors as warnings (you can remove it to make it strict)
+          flake8 . --count --show-source --statistics
