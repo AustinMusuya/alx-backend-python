@@ -44,3 +44,55 @@ pipeline {
         }
     }
 }
+
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
+        DOCKERHUB_REPO = "your-dockerhub-username/messaging_app"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-username/alx-backend-python.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir('messaging_app') {
+                    script {
+                        sh "docker build -t ${DOCKERHUB_REPO}:latest ."
+                    }
+                }
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                script {
+                    sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    sh "docker push ${DOCKERHUB_REPO}:latest"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Docker image built and pushed successfully!"
+        }
+        failure {
+            echo "Build failed. Check logs."
+        }
+    }
+}
